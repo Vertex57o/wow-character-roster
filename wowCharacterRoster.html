@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta>
+		<script type="text/javascript" src="http://static.wowhead.com/widgets/power.js"></script>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+		<!-- assign the local style -->
+		<link rel="stylesheet" type="text/css" href="myCharRoster.css" />
+	</head>
+	<body>
+		<!-- the body has one div, and the script populates it -->
+		<div id="oCo5R">My characters are shown below. To see expanded information, click the heading to show or hide the subsections. This data is retrieved from the Armory using the <a href="http://blizzard.github.com/api-wow-docs/">Blizzard Community Platform API</a>.<br /><br /></div>
+
+		<script type="text/javascript">
+			// DEFINE FUNCTIONS
+			// function to create the source href for a blizzard icon
+			function blizzIcon (iconName, iconSize) {
+				var bIcon = "http://us.media.blizzard.com/wow/icons/"+iconSize+"/"+iconName+".jpg";
+				return bIcon;
+			}
+
+			// function to create sub-heading divs
+			function makeDiv (divIdName) {
+				var divId = "<div id=\""+divIdName+"\">"; // create a sub-heading div
+				divId+="<div id=\""+divIdName+"_head\" style=\"display: none\"></div>"; // sub-heading head
+				divId+="<div id=\""+divIdName+"_body\" style=\"display: none\"></div>"; // sub-heading body
+				divId+="</div>";
+				return divId;
+			}
+
+			// function to convert JSON timestamp into dd-mmm-yyyy format
+			function convertTimestamp (tmstmp) {
+				var d = new Date(tmstmp);
+				var fmtd = d.getDate()+" "+ monthsInText[d.getMonth()]+" "+d.getFullYear();
+				return fmtd;
+			}
+
+			// function to show and hide the character data sub-section
+			function togCharacter(divId) {
+				var ele = document.getElementById(divId);
+				if(ele.style.display == "block") {  // display is currently block, so hide it
+					ele.style.display = "none";
+				}
+				else { // display is currently none, so show it
+					ele.style.display = "block";
+				}
+			}
+
+			// function to show and hide the tabs within the character data sub-section
+			function togCharTab(divId) {
+				var id = "#"+divId;
+				// Hide the context element's siblings
+				$(id).siblings().removeClass("showMe");
+				$(id).siblings().addClass("hideMe");
+
+				// Now show the one that's been clicked
+				$(id).removeClass("hideMe");
+				$(id).addClass("showMe");
+			}
+
+
+			// function to update the background image using character portrait
+			function updateBackgroundImage( id, img) {
+				img = "url("+img+")";
+				var ele = document.getElementById(id);
+				ele.style.backgroundImage = img;
+			}
+
+			// create the item url for wowhead
+			function makeWowheadUrl (type, id) {
+				var url = "http://www.wowhead.com/"+type+"="+id;
+				return url;
+			}
+
+			// assemble the gems for wowhead tooltips
+			function assembleGemString (gem0, gem1, gem2) {
+				var gems = "";
+				if (gem0) {
+					gems+="gems="+gem0;
+					if (gem1) {
+						gems+=":"+gem1;
+						if (gem2) {
+							gems+=":"+gem2;
+						};
+					};
+				};
+				return gems;
+			}
+
+			// function to format a number into comma string
+			// from http://www.mredkj.com/javascript/numberFormat.html#addcommas
+			function addCommas(nStr) {
+				nStr += '';
+				x = nStr.split('.');
+				x1 = x[0];
+				x2 = x.length > 1 ? '.' + x[1] : '';
+				var rgx = /(\d+)(\d{3})/;
+				while (rgx.test(x1)) {
+					x1 = x1.replace(rgx, '$1' + ',' + '$2');
+				}
+				return x1 + x2;
+			}
+
+			// DEFINE VARIABLES
+			var $html;
+			var apiClasses;
+			var apiRaces;
+
+			// translate Blizzard's numeric values to text
+			var genders = new Array ("Male","Female");
+
+			// JSON DATA
+
+			// http://us.battle.net/api/wow/data/character/classes
+			var apiClasses = {"classes":[
+				{"id":3,"mask":4,"powerType":"focus","name":"Hunter"},
+				{"id":4,"mask":8,"powerType":"energy","name":"Rogue"},
+				{"id":1,"mask":1,"powerType":"rage","name":"Warrior"},
+				{"id":2,"mask":2,"powerType":"mana","name":"Paladin"},
+				{"id":7,"mask":64,"powerType":"mana","name":"Shaman"},
+				{"id":8,"mask":128,"powerType":"mana","name":"Mage"},
+				{"id":5,"mask":16,"powerType":"mana","name":"Priest"},
+				{"id":6,"mask":32,"powerType":"runic-power","name":"Death Knight"},
+				{"id":11,"mask":1024,"powerType":"mana","name":"Druid"},
+				{"id":9,"mask":256,"powerType":"mana","name":"Warlock"}
+			]};
+
+			// http://us.battle.net/api/wow/data/character/races
+			var apiRaces = {"races":[
+				{"id":1,"mask":1,"side":"alliance","name":"Human"},
+				{"id":5,"mask":16,"side":"horde","name":"Undead"},
+				{"id":11,"mask":1024,"side":"alliance","name":"Draenei"},
+				{"id":7,"mask":64,"side":"alliance","name":"Gnome"},
+				{"id":8,"mask":128,"side":"horde","name":"Troll"},
+				{"id":4,"mask":8,"side":"alliance","name":"Night Elf"},
+				{"id":2,"mask":2,"side":"horde","name":"Orc"},
+				{"id":3,"mask":4,"side":"alliance","name":"Dwarf"},
+				{"id":10,"mask":512,"side":"horde","name":"Blood Elf"},
+				{"id":22,"mask":2097152,"side":"alliance","name":"Worgen"},
+				{"id":6,"mask":32,"side":"horde","name":"Tauren"},
+				{"id":9,"mask":256,"side":"horde","name":"Goblin"}
+			]};
+
+			// item slots by number, name and empty icon
+			var inventorySlotNumber=[
+				{"id":  "1", "name": "head",     "icon": "http://1.bp.blogspot.com/-xzMF9z5LSts/UCz4sMO-pkI/AAAAAAAAAT4/sRKBhHWM8VM/s400/empty-head.png"},
+				{"id":  "2", "name": "neck",     "icon": "http://4.bp.blogspot.com/-NNCF6XhUwhQ/UCz4r31mOeI/AAAAAAAAATs/_Kt5_DwLqBU/s400/empty-neck.png"},
+				{"id":  "3", "name": "shoulder", "icon": "http://3.bp.blogspot.com/-x7YeqEepeqU/UCz4j0iJ9zI/AAAAAAAAATU/W6ScnNerniU/s400/empty-shoulder.png"},
+				{"id":  "4", "name": "shirt",    "icon": "http://4.bp.blogspot.com/-Px5bsd4j5u4/UCz4jU2wlEI/AAAAAAAAATI/NPUMLGPJ5G4/s400/empty-shirt.png"},
+				{"id":  "5", "name": "chest",    "icon": "http://4.bp.blogspot.com/-mjeWIgS6BnY/UCz4kbGYLAI/AAAAAAAAATg/QS2O8f-zkwA/s400/empty-chest.png"},
+				{"id":  "6", "name": "waist",    "icon": "http://4.bp.blogspot.com/-fI6QCk5W0lU/UCz4ThR7g6I/AAAAAAAAASM/marhCe7o3jg/s400/empty-waist.png"},
+				{"id":  "7", "name": "legs",     "icon": "http://3.bp.blogspot.com/-Jl9Ko_t11jo/UCz4UEo4o_I/AAAAAAAAASY/j6OcfvE2CBs/s400/empty-legs.png"},
+				{"id":  "8", "name": "feet",     "icon": "http://1.bp.blogspot.com/-7pnBkd3u9v0/UCz4TMyWU_I/AAAAAAAAASA/eDyRt0iVo_g/s400/empty-feet.png"},
+				{"id":  "9", "name": "wrist",    "icon": "http://3.bp.blogspot.com/-NZhCp8sAElk/UCz4ik_ugbI/AAAAAAAAASw/D210D__Uk0w/s400/empty-wrists.png"},
+				{"id": "10", "name": "hands",    "icon": "http://2.bp.blogspot.com/-wyjUkRgeBek/UCz4UgBxfdI/AAAAAAAAASk/FrFJf2FHvY0/s400/empty-hands.png"},
+				{"id": "11", "name": "finger1",  "icon": "http://4.bp.blogspot.com/-h34VLr49DuI/UCz4AbhAF4I/AAAAAAAAARc/arLWi_SzAuc/s400/empty-ring.png"},
+				{"id": "12", "name": "finger2",  "icon": "http://4.bp.blogspot.com/-h34VLr49DuI/UCz4AbhAF4I/AAAAAAAAARc/arLWi_SzAuc/s400/empty-ring.png"},
+				{"id": "13", "name": "trinket1", "icon": "http://1.bp.blogspot.com/-fPyezuxi5iA/UCz4As4MXfI/AAAAAAAAARo/uBVtvdVv1fI/s400/empty-trinket.png"},
+				{"id": "14", "name": "trinket2", "icon": "http://1.bp.blogspot.com/-fPyezuxi5iA/UCz4As4MXfI/AAAAAAAAARo/uBVtvdVv1fI/s400/empty-trinket.png"},
+				{"id": "15", "name": "back",     "icon": "http://4.bp.blogspot.com/-mjeWIgS6BnY/UCz4kbGYLAI/AAAAAAAAATg/QS2O8f-zkwA/s400/empty-chest.png"},
+				{"id": "16", "name": "mainHand", "icon": "http://2.bp.blogspot.com/-Bz6Jo7V7EK8/UCz4SiXRb_I/AAAAAAAAAR0/qcZeuIfkmmg/s400/empty-mainHand.png"},
+				{"id": "17", "name": "offHand",  "icon": "http://1.bp.blogspot.com/-kK9nFQa7iFU/UCz3_kiclxI/AAAAAAAAARQ/rGpF96uEEAY/s400/empty-offHand.png"},
+// 				{"id": "18", "name": "ranged",   "icon": "http://4.bp.blogspot.com/-OTo4uRJm6Qo/UCz3_TH08AI/AAAAAAAAARE/ISb4uDPeGe0/s400/empty-ranged.png"},
+				{"id": "19", "name": "tabard",   "icon": "http://4.bp.blogspot.com/-YWYJw6DtsJM/UCz4i8oeVPI/AAAAAAAAAS8/SdvbtaPSjxc/s400/empty-tabard.png"}
+			];
+
+			// Reputations
+			var repsByFactionExpansion = [
+				{"side":"horde", "expansion":[
+					{"name":"Classic"},
+					{"name":"The Burning Crusade",
+						"factions":[
+							{"id":"941","name":"The Mag'har"},
+							{"id":"947","name":"Thrallmar"},
+							{"id":"922","name":"Tranquillen"}
+						]
+					},
+					{"name":"Horde Expedition",
+						"factions":[
+							{"id":"1067","name":"The Hand of Vengeance"},
+							{"id":"1124","name":"The Sunreavers"},
+							{"id":"1064","name":"The Taunka"},
+							{"id":"1085","name":"Warsong Offensive"}
+						]
+					},
+					{"name":"Cataclysm",
+						"factions": [
+							{"id":"1172","name":"Dragonmaw Clan"},
+							{"id":"1178","name":"Hellscream's Reach"}
+						]
+					},
+					{"name":"Horde",
+						"factions":[
+							{"id":"1133","name":"Bilgewater Cartel"},
+							{"id":"530","name":"Darkspear Trolls"},
+							{"id":"1352","name":"Huojin Pandaren"},
+							{"id":"76","name":"Orgrimmar"},
+							{"id":"911","name":"Silvermoon City"},
+							{"id":"81","name":"Thunder Bluff"},
+							{"id":"68","name":"Undercity"}
+						]
+					},
+					{"name":"Horde Forces",
+						"factions":[
+							{"id":"729","name":"Frostwolf Clan"},
+							{"id":"510","name":"The Defilers"},
+							{"id":"889","name":"Warsong Outriders"}
+						]
+					}
+				]
+				},
+				{"side":"alliance","expansion":[
+					{"name":"Classic",
+						"factions":[
+							{"id":"589","name":"Wintersaber Trainers"}
+						]
+					},
+					{"name":"The Burning Crusade",
+						"factions":[
+							{"id":"946","name":"Honor Hold"},
+							{"id":"979","name":"Kurenai"}
+						]
+					},
+					{"name":"Alliance Vanguard",
+						"factions":[
+							{"id":"1068","name":"Explorers' League"},
+							{"id":"1126","name":"The Frostborn"},
+							{"id":"1094","name":"The Silver Covenant"},
+							{"id":"1050","name":"Valiance Expedition"}
+						]
+					},
+					{"name":"Cataclysm",
+						"factions": [
+							{"id":"1177","name":"Baradin's Wardens"},
+							{"id":"1174","name":"Wildhammer Clan"}
+						]
+					},
+					{"name":"Alliance",
+						"factions":[
+							{"id":"69","name":"Darnassus"},
+							{"id":"930","name":"Exodar"},
+							{"id":"1134","name":"Gilneas"},
+							{"id":"54","name":"Gnomeregan"},
+							{"id":"47","name":"Ironforge"},
+							{"id":"72","name":"Stormwind"},
+							{"id":"1353","name":"Tushui Pandaren"}
+						]
+					},
+					{"name":"Alliance Forces",
+						"factions":[
+							{"id":"890","name":"Silverwing Sentinels"},
+							{"id":"730","name":"Stormpike Guard"},
+							{"id":"590","name":"The League of Arathor"}
+						]
+					}
+				]
+				},
+				{"side":"neutral","expansion":[
+					{"name":"Classic",
+						"factions":[
+							{"id":"529","name":"Argent Dawn"},
+							{"id":"87","name":"Bloodsail Buccaneers"},
+							{"id":"910","name":"Brood of Nozdormu"},
+							{"id":"609","name":"Cenarion Circle"},
+							{"id":"909","name":"Darkmoon Faire"},
+							{"id":"92","name":"Gelkis Clan Centaur"},
+							{"id":"749","name":"Hydraxian Waterlords"},
+							{"id":"93","name":"Magram Clan Centaur"},
+							{"id":"349","name":"Ravenholdt"},
+							{"id":"809","name":"Shen'dralar"},
+							{"id":"70","name":"Syndicate"},
+							{"id":"59","name":"Thorium Brotherhood"},
+							{"id":"576","name":"Timbermaw Hold"},
+							{"id":"270","name":"Zandalar Tribe"}
+						]
+					},
+					{"name":"Steamwheedle Cartel",
+						"factions":[
+							{"id":"21","name":"Booty Bay"},
+							{"id":"577","name":"Everlook"},
+							{"id":"369","name":"Gadgetzan"},
+							{"id":"470","name":"Ratchet"}
+						]
+					},
+					{"name":"The Burning Crusade",
+						"factions":[
+							{"id":"1012","name":"Ashtongue Deathsworn"},
+							{"id":"942","name":"Cenarion Expedition"},
+							{"id":"989","name":"Keepers of Time"},
+							{"id":"1015","name":"Netherwing"},
+							{"id":"1038","name":"Ogri'la"},
+							{"id":"970","name":"Sporeggar"},
+							{"id":"933","name":"The Consortium"},
+							{"id":"990","name":"The Scale of Sands"},
+							{"id":"967","name":"The Violet Eye"}
+						]
+					},
+					{"name":"Shattrath City",
+						"factions":[
+							{"id":"1011","name":"Lower City"},
+							{"id":"1031","name":"Sha'tari Skyguard"},
+							{"id":"1077","name":"Shattered Sun Offensive"},
+							{"id":"932","name":"The Aldor"},
+							{"id":"934","name":"The Scryers"},
+							{"id":"935","name":"The Sha'tar"}
+						]
+					},
+					{"name":"Wrath of the Lich King",
+						"factions":[
+							{"id":"1106","name":"Argent Crusade"},
+							{"id":"1090","name":"Kirin Tor"},
+							{"id":"1098","name":"Knights of the Ebon Blade"},
+							{"id":"1156","name":"The Ashen Verdict"},
+							{"id":"1073","name":"The Kalu'ak"},
+							{"id":"1119","name":"The Sons of Hodir"},
+							{"id":"1091","name":"The Wyrmrest Accord"}
+						]
+					},
+					{"name":"Sholazar Basin",
+						"factions":[
+							{"id":"1104","name":"Frenzyheart Tribe"},
+							{"id":"1105","name":"The Oracles"}
+						]
+					},
+					{"name":"Cataclysm",
+						"factions": [
+							{"id":"1204","name":"Avengers of Hyjal"},
+							{"id":"1158","name":"Guardians of Hyjal"},
+							{"id":"1178","name":"Ramkahen"},
+							{"id":"1173","name":"The Earthen Ring"},
+							{"id":"1135","name":"Therazane"}
+						]
+					},
+					{"name":"Mists of Pandaria",
+						"factions":[
+							{"id":"1269","name":"Golden Lotus"},
+							{"id":"1271","name":"Order of the Cloud Serpent"},
+							{"id":"1270","name":"Shado-Pan"},
+							{"id":"1216","name":"Shang Xi's Academy"},
+							{"id":"1302","name":"The Anglers"},
+							{"id":"1341","name":"The August Celestials"},
+							{"id":"1359","name":"The Black Prince"},
+							{"id":"1337","name":"The Klaxxi"},
+							{"id":"1345","name":"The Lorewalkers"}
+						]
+					},
+					{"name":"The Tillers",
+						"factions":[
+							{"id":"1277","name":"Chee Chee"},
+							{"id":"1275","name":"Ella"},
+							{"id":"1283","name":"Farmer Fung"},
+							{"id":"1282","name":"Fish Fellreed"},
+							{"id":"1281","name":"Gina Mudclaw"},
+							{"id":"1279","name":"Haohan Mudclaw"},
+							{"id":"1273","name":"Jogu the Drunk"},
+							{"id":"1276","name":"Old Hillpaw"},
+							{"id":"1278","name":"Sho"},
+							{"id":"1280","name":"Tina Mudclaw"}
+						]
+					},
+					{"name":"Guild",
+						"factions":[
+							{"id":"1168","name":"Guild"}
+						]
+					}
+				]}
+			];
+
+			// reputation levels
+			var repLevels = [
+				{"value": 0,     "name": "Hated"},
+				{"value": 36000, "name": "Hostile"},
+				{"value": 39000, "name": "Unfriendly"},
+				{"value": 42000, "name": "Neutral"},
+				{"value": 45000, "name": "Friendly"},
+				{"value": 51000, "name": "Honored"},
+				{"value": 63000, "name": "Revered"},
+				{"value": 84000, "name": "Exalted"}
+			];
+
+			// my characters and servers
+			var myCharRoster = [
+ 				{ "id": "01", "name": "Cibolero",   "realm": "Borean Tundra"},
+				{ "id": "02", "name": "Enfermero",    "realm": "Borean Tundra"},
+				{ "id": "03", "name": "Artie",        "realm": "Borean Tundra"},
+				{ "id": "04", "name": "Shamilicious", "realm": "Borean Tundra"},
+				{ "id": "05", "name": "Hoofadin",     "realm": "Borean Tundra"},
+				{ "id": "06", "name": "Wockandwoll",  "realm": "Borean Tundra"},
+				{ "id": "07", "name": "Peasheeper",   "realm": "Borean Tundra"},
+				{ "id": "08", "name": "Pequeñito",    "realm": "Borean Tundra"},
+				{ "id": "09", "name": "Eeanymeany",   "realm": "Borean Tundra"},
+				{ "id": "10", "name": "Moonhowls",    "realm": "Borean Tundra"},
+				{ "id": "11", "name": "Gibbergabber", "realm": "Velen"},
+				{ "id": "12", "name": "Cazadorito",   "realm": "Velen"},
+				{ "id": "13", "name": "Aeiou",        "realm": "Velen"}
+			];
+
+			// convert months to text
+			var monthsInText = new Array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+
+			// div structure
+			var cDiv = [
+				{ "divId": "cItem", "display": "Items"},
+				{ "divId": "cTals", "display": "Talents &amp; Glyphs"},
+				{ "divId": "cProf", "display": "Professions"},
+				{ "divId": "cPets", "display": "Pets"},
+				{ "divId": "cAchv", "display": "Achievements"},
+				{ "divId": "cPets", "display": "Companions &amp; Mounts"},
+				{ "divId": "cReps", "display": "Reputations"},
+				{ "divId": "cDung", "display": "Dungeons &amp; Raids"},
+				{ "divId": "cPvsP", "display": "Player vs. Player"}
+			];
+
+			var side;
+
+			// START
+			$.each(myCharRoster,function(c, json) { // for each entry in myCharRoster
+				// console.log("Now processing myCharRoster "+json.id+" - "+json.name+"...");
+
+				// assign a unique div ID by character and then add subsections
+				var cIndex = json.id; // outer wrapper for that character
+				var cHead = cIndex+"_head"; // profile line in roster
+				var cBody = cIndex+"_body"; // the meat of the character
+
+				// write out the div containers for this character
+				$html = "<div id=\""+cIndex+"\">";
+				$html += "<div id=\""+cHead+"\"></div>";
+				$html += "<div id=\""+cBody+"\" class=\"bodyWrapper\" style=\"display: none;\"></div>";
+				$html += "<div class=\"clear\"></div>";
+				$html += "</div>";
+				$($html).appendTo("#oCo5R"); // write the character roster div
+
+				var url = "http://us.battle.net/api/wow/character/"+json.realm+"/"+json.name+
+				"?fields=stats,feed,talents,items,reputation,titles,professions,companions,mounts,"+
+				"pet,achievements,progression,pvp,quests&jsonp=?";
+
+				// retrieve the JSON for this character from battle.net and store as 'bnJson'
+				$.getJSON( url, function( bnJson ) {
+					// console.log("  Processing bnJSON data for "+bnJson.name);
+
+					// format the sub-section background
+					// http://us.battle.net/static-render/us/borean-tundra/57/42897977-profilemain.jpg?alt=/wow/static/images/2d/profilemain/race/22-0.jpg
+
+					if(typeof bnJson.thumbnail === "undefined") {
+						$html = charPortrait = "http://us.battle.net/wow/static/images/2d/profilemain/race/"+bnJson.race+"-"+bnJson.gender+".jpg";
+					}
+					else {
+						var charPortrait = "http://us.battle.net/static-render/us/"+bnJson.thumbnail.replace(/-avatar\.jpg/,"-profilemain.jpg");
+					};
+					updateBackgroundImage(cBody, charPortrait);
+
+					// write out the current roster entry wrapper
+					$html = "<div class=\"rosterWrapper\"><a href=\"javascript:togCharacter('"+cBody+"');\">";
+
+					// Level
+					$html += "<div class=\"charLevel\">"+bnJson.level+"</div>";
+
+					// Faction and Race Icons
+					// use the current race from the api to look up the side in the predefined apiRaces
+					for (var i=0;i<apiRaces.races.length;i++) {
+						if (apiRaces.races[i].id == bnJson.race) { 	// get the race and gender for the icon
+							var rIcon = apiRaces.races[i].name; // for example -- race_gnome_male.jpg
+							rIcon = rIcon.replace(/ /g,'-');
+							rIcon = "race_"+rIcon+"_"+genders[bnJson.gender];
+							rIcon = rIcon.toLowerCase();
+							// use the race to determine the side
+							side = apiRaces.races[i].side.toLowerCase();
+							if (side=="horde") {
+								side="01";
+							}
+							else {
+								side="02";
+							};
+							// now get the side for the icon
+							var fIcon = "inv_bannerpvp_"+side
+							fIcon = blizzIcon(fIcon,"56");
+							break; // stop once found
+						};
+					};
+					$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+fIcon+")\"></div>";
+					$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+blizzIcon(rIcon, "56")+")\"></div>";
+
+					// Class Icon
+					// src="http://us.media.blizzard.com/wow/icons/56/class_hunter.jpg"
+					for ( var i=0;i<apiClasses.classes.length;i++ ) {
+						if (apiClasses.classes[i].id == bnJson.class) {
+							var cIcon = apiClasses.classes[i].name;
+							cIcon = cIcon.replace(/ /g,'-');
+							cIcon = "class_"+cIcon.toLowerCase();
+							break;
+						};
+					};
+					$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+blizzIcon(cIcon, "56")+")\"></div>";
+
+					// Character Name & Title
+					var selTitle = ""; // init empty title
+
+					// loop through the titles to retrieve the selected one
+					$.each(bnJson.titles,function(idxT,titles){
+						if (titles.selected) {
+							selTitle = titles.name;
+							return false; // break once found
+						};
+					});
+
+					var cName = bnJson.name;
+
+					// if a title was found, replace the %s with my name
+					if (selTitle.length > 0) {
+						cName = selTitle.replace(/\%s/,cName);
+					};
+
+					$html += "<div class=\"characterName\">"+cName+"</div>";
+
+					// Total Achievement Points
+					$html += "<div class=\"achvPoints\">"+addCommas(bnJson.achievementPoints)+"</div>";
+					$html += "<div class=\"achvIcon\"></div>";
+					$html += "</a><div class=\"clear\"></div></div>";
+					$($html).appendTo("#"+cHead);
+
+					// Populate the body section
+					$html = "<div class=\"clear\"></div><div class=\"tabMenu\"><ul>";
+					$.each(cDiv,function(idxM,menu){
+						$html += "<li><a href=\"javascript:togCharTab('"+cBody+"_"+menu.divId+"');\">";
+						$html += menu.display;
+						$html += "</a></li>";
+					});
+					$html += "</ul></div><div class=\"tabArea\">";
+					$.each(cDiv,function(idxB,bodyDiv){
+						$html += "<div id=\""+cBody+"_"+bodyDiv.divId+"\" class=\"hideMe\"></div>";
+					});
+					$html += "</div>";
+					$($html).appendTo("#"+cBody);
+
+/* START of ITEMS TAB */
+					var cItem = cBody+"_cItem"; // the character items div
+					var cItemS = cItem+"_slot"; // the character items slot div
+					$html = "<div id=\""+cItemS+"\"></div>";
+					$($html).appendTo("#"+cItem);
+					$(bnJson.items).each(function(idx, items) { // iterate over the items subset
+						for ( var i=0; i < inventorySlotNumber.length; i++ ) {
+							$html = "<div id=\""+cItem+"_"+inventorySlotNumber[i].id+"\" class=\"inventorySlot_"+inventorySlotNumber[i].name+"\"></div>";
+							$($html).appendTo("#"+cItemS);
+
+							var slot = items[inventorySlotNumber[i].name];
+							if (slot instanceof Object) {
+								var ttip = slot["tooltipParams"];
+								$rel = "";
+								if (ttip instanceof Object) { // this item has tooltips
+									if (ttip.gem0) {
+										var relGems = assembleGemString(ttip.gem0, ttip.gem1, ttip.gem2);
+										if ($rel.length > 0) {
+											$rel += relGems;
+										}
+										else {
+											$rel+="rel=\""+relGems;
+										};
+									};
+
+									if (ttip.enchant) {
+										var relEnch = "ench="+ttip.enchant;
+										if ($rel.length > 0) {
+											$rel += "&amp;"+relEnch;
+										}
+										else {
+											$rel+="rel=\""+relEnch;
+										};
+									};
+
+									var iSet = ttip["set"];
+									if (iSet instanceof Array) {
+										var set = "";
+										$(iSet).each(function(setKey,setId) {
+											if (set.length > 0) {
+												set += ":"+setId;
+											}
+											else {
+												set += setId;
+											};
+
+										});
+										var relSet = "pcs="+set;
+										if ($rel.length > 0) {
+											$rel += "&amp;"+relSet;
+										}
+										else {
+											$rel+="rel=\""+relSet;
+										};
+									};
+								};
+								// write out the html for this inventory slot item
+								$html = "<a href=\""+makeWowheadUrl("item", slot.id)+"\"";
+								if ($rel) {
+									$html += " "+$rel+"\"";
+								};
+								$html += ">";
+								$html += "<img class=\"item-quality-"+slot.quality+" icon32\" src=\"" + blizzIcon(slot.icon,"56") + "\"/>";
+								$html += "</a>";
+							}
+							else { // the slot was empty in the api, so populate the empty inventory icon
+								$html = "<a href=\"javascript:void()\"><img class=\"icon32 item-quality-0\" src=\""+inventorySlotNumber[i].icon+"\"/></a>";
+							};
+
+							$($html).appendTo("#"+cItem+"_"+inventorySlotNumber[i].id);  //"<div id=\""+cItem+"_"+inventorySlotNumber[i]+"\"></div>";
+						};
+					}); // end of each items iteration
+/* END of ITEMS TAB */
+
+/* START of TALENTS and GLYPHS TAB */
+					var cTals = cBody+"_cTals"; // the character talents div
+					$html ="<div class=\"transparency\"></div>";
+					$html+="<div class=\"tabTalents\">";
+
+					// iterate over the talents subset
+					$(bnJson.talents).each(function(idxS, specialization) {
+						if(typeof specialization.spec === "undefined") {
+							$html+="<div class=\"talents\">";
+							$html+="<div class=\"talText\">";
+							$html+="<span class=\"talTextTitle\">N/A</span>";
+							$html+="<span class=\"clear\"></span></div>";
+							$html+="<div class=\"specIcon\"><img src=\""+blizzIcon("inv_misc_questionmark","36")+"\"></img></div>";
+							$html+="</div>";
+						}
+						else {
+							$html+="<div class=\"speciality sIndex-"+idxS+"\">";
+							$html+="<div class=\"specText\">";
+							$html+="<span class=\"specName\">"+specialization.spec.name+"</span>";
+							$html+="<span class=\""+specialization.spec.role.toLowerCase()+"\"></span>";
+							$html+="<span class=\"clear\"></span>";
+							$html+="<span class=\"specDesc\">"+specialization.spec.description+"</span>";
+							$html+="</div>";
+							$html+="<div class=\"specIcon\">";
+							$html+="<img class=\"icon36\" src=\""+blizzIcon(specialization.spec.icon,"36")+"\"></img>";
+							$html+="</div>";
+							$html+="<div class=\"clear\"></div>";
+
+							// get the details for the actual talents
+							$html+="<div class=\"talents\">";
+							$(specialization.talents).each(function(idxT, talents) {
+								if(typeof talents.tier === "undefined") {
+								}
+								else {
+									$html+="<a href=\""+makeWowheadUrl("spell", talents.spell.id)+"\">";
+									$html+="<div class=\"talentLine\">";
+									$html+="<span><img class=\"icon18\" src=\""+blizzIcon(talents.spell.icon,"18")+"\"></img></span>";
+									$html+="<span class=\"talentName\">"+talents.spell.name+"</span>";
+									$html+="</div></a>";
+								};
+							});
+							$html+="</div>";
+
+							// get the glyphs for the selected spec
+							$html+="<div class=\"glyphs\">";
+							$(specialization.glyphs).each(function(idxG, glyphs) {
+
+								// Major glyphs
+								$html+="<div class=\"specName\">Major</div>";
+								$html+="<div>";
+								$(glyphs.major).each(function(idxGJ, major) {
+									$html+="<span><a href=\""+makeWowheadUrl("item", major.item)+"\">";
+									$html+="<img class=\"icon22\" src=\""+blizzIcon(major.icon,"36")+"\"></img></a></span>";
+								});
+								$html+="</div>";
+
+								// Minor glyphs
+								$html+="<div class=\"specName\">Minor</div>";
+								$html+="<div>";
+								$(glyphs.minor).each(function(idxGN, minor) {
+									$html+="<span><a href=\""+makeWowheadUrl("item", minor.item)+"\">";
+									$html+="<img class=\"icon22\" src=\""+blizzIcon(minor.icon,"36")+"\"></img></a></span>";
+								});
+								$html+="</div>";
+							});
+							$html+="</div>";
+							$html+="</div>";
+						};
+					}); // end of each talents iteration
+					$html+="</div>";
+					$($html).appendTo("#"+cTals);
+/* END of TALENTS and GLYPHS TAB */
+
+/* START of REPUTATION TAB */
+					var cReps=cBody+"_cReps";
+					$html ="<div class=\"transparency\"></div>";
+					$html+="<div class=\"tabReps\">";
+					$html+="<div class=\"reputations\">";
+
+					function writeRepDivs (arrExp, divId) {
+						console.log(arrExp);
+						$(arrExp).each(function(x, fbe) {
+							$html+="<div class=\"repEntry\" id=\""+divId+"_"+fbe.id+"\"></div>";
+// 							$html+="<div class=\"clear\"></div>";
+						});
+					}
+
+					// create the place holders for each reputation by expansion
+					$html+="<div><h3>Cataclysm</h3></div>";
+					writeRepDivs(repsByFactionExpansion[2].expansion[6].factions, cReps);
+
+					if (side=="01") {
+						writeRepDivs(repsByFactionExpansion[0].expansion[3].factions, cReps);
+					}
+					else {
+						writeRepDivs(repsByFactionExpansion[1].expansion[3].factions, cReps);
+					};
+
+					$html+="</div>";
+					$html+="</div>";
+					$($html).appendTo("#"+cReps);
+
+					// fill in the placeholders
+					$(bnJson.reputation).each(function(iRep, rep) { // iterate over the reputations subset
+						var repCur = (Number(rep.value))+repLevels[rep.standing].value;
+						var repPct = (repCur/84999)*100
+						if(repPct < 1){
+							repPct = 1;
+						}
+						else {
+							repPct = Math.round(repPct);
+						};
+						$html ="<div class=\"factionName\"><a href=\""+makeWowheadUrl("faction", rep.id)+"\">"+rep.name+"</a></div>";
+						$html+="<div class=\"meter "+repLevels[rep.standing].name.toLowerCase()+"\">";
+						$html+="<span style=\"width:"+repPct+"%;\"></span>";
+						$html+="</div>";
+						$html+="<div class=\"factionStanding\">"+repLevels[rep.standing].name+"</div>";
+						$($html).appendTo("#"+cReps+"_"+rep.id);
+					});
+/* END of REPUTATION TAB (*/
+				}); // end JSON data retrieval loop
+			}); // end myCharRoster loop
+		</script>
+	</body>
+</html>

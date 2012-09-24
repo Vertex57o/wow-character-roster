@@ -1,0 +1,602 @@
+#oCo5R {
+	font-family: Arial;
+	font-size: 12px;
+	color: #4c4c4c;
+}
+
+/* RESET */
+#oCo5R * {
+/* first reset the styles for everything so we don't inherit something we didnt want */
+	margin:0;
+	padding:0;
+}
+
+#OC5R .clear {
+	clear: both;
+	display: block;
+	overflow: hidden;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+}
+
+/* ASSIGN A COLOR AND TEXT SIZE TO ELEMENTS */
+#oCo5R .rosterWrapper {
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+/* INVENTORY ITEM QUALITY LEVELS */
+
+#oCo5R .item-quality-0,
+#oCo5R .item-quality-1,
+#oCo5R .item-quality-2,
+#oCo5R .item-quality-3,
+#oCo5R .item-quality-4,
+#oCo5R .item-quality-5,
+#oCo5R .item-quality-6,
+#oCo5R .item-quality-7 {
+	border-style: solid;
+	border-width: 2px;
+}
+
+#oCo5R .item-quality-0 {
+	border-color: #9d9d9d;
+}
+
+#oCo5R .item-quality-1 {
+	border-color: #ffffff;
+}
+
+#oCo5R .item-quality-2 {
+	border-color: #1eff00;
+}
+
+#oCo5R .item-quality-3 {
+	border-color: #0070dd;
+}
+
+#oCo5R .item-quality-4 {
+	border-color: #a335ee;
+}
+
+#oCo5R .item-quality-5 {
+	border-color: #ff8000;
+}
+
+#oCo5R .item-quality-6 {
+	border-color: #e6cc80;
+}
+
+#oCo5R .item-quality-7 {
+	border-color: #e6cc80;
+}
+
+/* SUBSECTION ICONS */
+#oCo5R .icon18,
+#oCo5R .icon22,
+#oCo5R .icon32,
+#oCo5R .icon36 {
+	margin: 0px 4px;
+	vertical-align: top;
+	background-position: top;
+	background-repeat: no-repeat;
+}
+
+#oCo5R .icon18 {
+	background-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
+#oCo5R .icon22 {
+	background-size: 22px;
+	width: 22px;
+	height: 22px;
+}
+
+#oCo5R .icon32 {
+	background-size: 32px;
+	width: 32px;
+	height: 32px;
+}
+
+#oCo5R .icon36 {
+	background-size: 36px;
+	width: 36px;
+	height: 36px;
+}
+
+#oCo5R .border0 {
+	border: 0px transparent;
+}
+
+#oCo5R .border2 {
+	border: 2px solid;
+	border-color: #a60000;
+}
+
+/* LAYOUT THE ROSTER */
+#oCo5R .rosterWrapper {
+	margin: 0px;
+	padding: 6px 0px 6px 0px;
+	display:block;
+}
+
+#oCo5R .characterName,
+#oCo5R .charLevel,
+#oCo5R .rosterIcon,
+#oCo5R .achvPoints,
+#oCo5R .achvIcon {
+	display: inline-block;
+}
+
+#oCo5R .achvPoints,
+#oCo5R .achvIcon {
+	float: right;
+}
+
+#oCo5R .charLevel {
+	margin: 0px 4px;
+	height: 32px;
+	font-size: 32px;
+}
+
+#oCo5R .characterName {
+	width: 210px;
+	margin: 0px 6px;
+}
+
+#oCo5R .achvIcon {
+	height: 10px;
+	width: 8px;
+	margin: 0px 2px;
+	background-image: url("http://us.battle.net/wow/static/images/icons/achievements.gif");
+	background-position: top;
+	background-repeat: no-repeat;
+}
+
+/* LAYOUT THE SUBSECTION */
+#oCo5R .bodyWrapper {
+	background-repeat: no-repeat;
+	background-image: none;
+	background-size: 490px;
+	background-position-y: bottom;
+	width: 490px;
+	height: 364px;
+	position: relative;
+}
+
+#oCo5R .tabMenu,
+#oCo5R .tabArea {
+	display: block;
+	position: absolute;
+}
+
+/* SUBSECTION MENU */
+#oCo5R .tabMenu {
+	width: 120px;
+	height: 100%;
+	background-color: #707070;
+}
+
+#oCo5R .tabMenu ul {
+	list-style: none;
+	font-size: .85em;
+}
+
+#oCo5R .tabMenu li a {
+	background-color: transparent;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #242424;
+	color: #cccccc;
+	display: block;
+	margin: 0;
+	padding: 8px 12px;
+	text-decoration: none;
+}
+
+#oCo5R .tabMenu li a:hover {
+	background-color: #cccccc;
+	color: #242424;
+	padding-bottom: 8px;
+}
+#oCo5R .tabArea {
+	left: 130px;
+	height: 360px;
+	width: 360px;
+}
+
+/* SHOW OR HIDE */
+#oCo5R .showMe {
+	display: block;
+}
+
+#oCo5R .hideMe {
+	display: none;
+}
+
+/* INVENTORY ITEMS
+divide into two columns: left col @ x-pos 280px and right col @ x-pos 320px   */
+#oCo5R .inventorySlot_head,
+#oCo5R .inventorySlot_neck,
+#oCo5R .inventorySlot_shoulder,
+#oCo5R .inventorySlot_back,
+#oCo5R .inventorySlot_chest,
+#oCo5R .inventorySlot_shirt,
+#oCo5R .inventorySlot_tabard,
+#oCo5R .inventorySlot_wrist,
+#oCo5R .inventorySlot_hands,
+#oCo5R .inventorySlot_waist,
+#oCo5R .inventorySlot_hands,
+#oCo5R .inventorySlot_legs,
+#oCo5R .inventorySlot_feet,
+#oCo5R .inventorySlot_finger1,
+#oCo5R .inventorySlot_finger2,
+#oCo5R .inventorySlot_trinket1,
+#oCo5R .inventorySlot_trinket2,
+#oCo5R .inventorySlot_mainHand,
+#oCo5R .inventorySlot_offHand,
+#oCo5R .inventorySlot_ranged {
+	position: absolute;
+	margin: 2px;
+}
+
+#oCo5R .inventorySlot_head {
+	top: 0px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_neck {
+	top: 40px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_shoulder {
+	top: 80px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_back {
+	top: 120px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_chest {
+	top: 160px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_shirt {
+	top: 200px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_tabard {
+	top: 240px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_wrist {
+	top: 280px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_hands {
+	top: 0px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_waist
+ {
+	top: 40px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_legs {
+	top: 80px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_feet {
+	top: 120px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_finger1 {
+	top: 160px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_finger2 {
+	top: 200px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_trinket1 {
+	top: 240px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_trinket2 {
+	top: 280px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_mainHand {
+	top: 320px;
+	left: 280px;
+}
+
+#oCo5R .inventorySlot_offHand {
+	top: 320px;
+	left: 320px;
+}
+
+#oCo5R .inventorySlot_ranged {
+	top: 320px;
+	left: 240px;
+}
+
+/* TALENTS AND GLYPHS */
+#oCo5R .tabTalents,
+#oCo5R .specIcon,
+#oCo5R .talents,
+#oCo5R .speciality,
+#oCo5R .glyphs,
+#oCo5R .tabReps {
+	display: block;
+	position: absolute;
+}
+
+#oCo5R .sIndex-0 {
+	top: 0px;
+}
+
+#oCo5R .sIndex-1 {
+	top: 180px;
+}
+
+#oCo5R .tabTalents,
+#oCo5R .tabReps {
+	color: #ffffff;
+}
+
+#oCo5R .transparency {
+	height: 364px;
+	width: 370px;
+	left: -10px;
+	background-color: #707070;
+	opacity: 0.75;
+	position: absolute;
+}
+
+#oCo5R .dps,
+#oCo5R .healing,
+#oCo5R .tank {
+	width: 16px;
+	height: 16px;
+	background: url("http://us.battle.net/wow/static/images/icons/roles.png") no-repeat;
+	display: inline-block;
+	margin-left: 8px;
+}
+
+#oCo5R .healing {
+	background-position-x: -16px;
+}
+
+#oCo5R .tank {
+	background-position-x: -32px;
+}
+
+#oCo5R .empty {
+	color: #996E46;
+}
+
+#oCo5R .specText {
+	width: 300px;
+	top: 0px;
+}
+
+#oCo5R .specIcon {
+	width: 40px;
+	top: 4px;
+	left: 316px;
+}
+
+#oCo5R .specName {
+	font-size:1.1em;
+	font-weight: bold;
+}
+
+#oCo5R .specDesc {
+	font-size: .9em;
+	display: block;
+	margin-bottom: 4px;
+}
+
+#oCo5R .talentLine{
+	margin: 1px 0px 4px 0px;
+}
+
+#oCo5R .talentName {
+	font-size: 0.9em;
+	margin: 0px 4px;
+	vertical-align: top;
+}
+
+#oCo5R .talents {
+	width: 220px;
+}
+
+#oCo5R .glyphs {
+	left: 268px;
+	width: 120px;
+}
+
+/* factions */
+#oCo5R .repEntry {
+	margin: 2px 0px;
+	width: 100%;
+	height: 14px;
+}
+
+#oCo5R .factionName,
+#oCo5R .meter {
+	float: left;
+}
+
+#oCo5R .factionName {
+	width: 100px;
+}
+
+#oCo5R .factionStanding {
+	float: right;
+	width: 60px;
+	text-align: right;
+}
+
+/* METER */
+#oCo5R .meter {
+	height: 8px;
+	width: 148px;
+	margin: 0px 14px;
+	background: #242424;
+	-moz-border-radius: 25px;
+	-webkit-border-radius: 25px;
+	border-radius: 25px;
+	padding: 2px;
+	-webkit-box-shadow: inset 0 -1px 1px rgba(255,255,255,0.3);
+	-moz-box-shadow   : inset 0 -1px 1px rgba(255,255,255,0.3);
+	box-shadow        : inset 0 -1px 1px rgba(255,255,255,0.3);
+}
+
+#oCo5R .meter span {
+	display: block;
+	height: 100%;
+	   -webkit-border-top-right-radius: 20px;
+	-webkit-border-bottom-right-radius: 20px;
+	       -moz-border-radius-topright: 20px;
+	    -moz-border-radius-bottomright: 20px;
+	           border-top-right-radius: 20px;
+	        border-bottom-right-radius: 20px;
+	    -webkit-border-top-left-radius: 20px;
+	 -webkit-border-bottom-left-radius: 20px;
+	        -moz-border-radius-topleft: 20px;
+	     -moz-border-radius-bottomleft: 20px;
+	            border-top-left-radius: 20px;
+	         border-bottom-left-radius: 20px;
+	background-color: #cccccc;
+	background-image: -webkit-gradient(
+	  linear,
+	  left bottom,
+	  left top,
+	  color-stop(0, #cccccc),
+	  color-stop(1, #525252)
+	 );
+	background-image: -webkit-linear-gradient(
+	  center bottom,
+	  #cccccc 37%,
+	  #525252 69%
+	 );
+	background-image: -moz-linear-gradient(
+	  center bottom,
+	  #cccccc 37%,
+	  #525252 69%
+	 );
+	background-image: -ms-linear-gradient(
+	  center bottom,
+	  #cccccc 37%,
+	  #525252 69%
+	 );
+	background-image: -o-linear-gradient(
+	  center bottom,
+	  #cccccc 37%,
+	  #525252 69%
+	 );
+	-webkit-box-shadow:
+	  inset 0 2px 9px  rgba(255,255,255,0.3),
+	  inset 0 -2px 6px rgba(0,0,0,0.4);
+	-moz-box-shadow:
+	  inset 0 2px 9px  rgba(255,255,255,0.3),
+	  inset 0 -2px 6px rgba(0,0,0,0.4);
+	position: relative;
+	overflow: hidden;
+}
+
+#oCo5R .hated span {
+	background-color: #cc0000;
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #cc0000),color-stop(1, #cc0000));
+	background-image: -webkit-linear-gradient(top, #cc0000, #242424);
+    background-image: -moz-linear-gradient(top, #cc0000, #242424);
+	background-image: -ms-linear-gradient(top, #cc0000, #242424);
+	background-image: -o-linear-gradient(top, #cc0000, #242424);
+}
+
+#oCo5R .hostile span {
+	background-color: #ff0000;
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #ff0000),color-stop(1, #cc0000));
+	background-image: -webkit-linear-gradient(top, #ff0000, #242424);
+    background-image: -moz-linear-gradient(top, #ff0000, #242424);
+	background-image: -ms-linear-gradient(top, #ff0000, #242424);
+	background-image: -o-linear-gradient(top, #ff0000, #242424);
+}
+
+#oCo5R .unfriendly span {
+	background-color: #f26000;
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #f26000),color-stop(1, #cc0000));
+	background-image: -webkit-linear-gradient(top, #f26000, #242424);
+    background-image: -moz-linear-gradient(top, #f26000, #242424);
+	background-image: -ms-linear-gradient(top, #f26000, #242424);
+	background-image: -o-linear-gradient(top, #f26000, #242424);
+}
+
+#oCo5R .neutral span {
+	background-color: #e4e400;
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #e4e400),color-stop(1, #cc0000));
+	background-image: -webkit-linear-gradient(top, #e4e400, #242424);
+    background-image: -moz-linear-gradient(top, #e4e400, #242424);
+	background-image: -ms-linear-gradient(top, #e4e400, #242424);
+	background-image: -o-linear-gradient(top, #e4e400, #242424);
+}
+
+#oCo5R .friendly span {
+	background-color: #33ff33;
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #33ff33),color-stop(1, #cc0000));
+	background-image: -webkit-linear-gradient(top, #33ff33, #242424);
+    background-image: -moz-linear-gradient(top, #33ff33, #242424);
+	background-image: -ms-linear-gradient(top, #33ff33, #242424);
+	background-image: -o-linear-gradient(top, #33ff33, #242424);
+}
+
+#oCo5R .honored span {
+	background-color: #33ff33;
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #5fe65d),color-stop(1, #cc0000));
+	background-image: -webkit-linear-gradient(top, #5fe65d, #242424);
+    background-image: -moz-linear-gradient(top, #5fe65d, #242424);
+	background-image: -ms-linear-gradient(top, #5fe65d, #242424);
+	background-image: -o-linear-gradient(top, #5fe65d, #242424);
+}
+
+#oCo5R .revered span {
+	background-color: #33ff33;
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #53e9bc),color-stop(1, #cc0000));
+	background-image: -webkit-linear-gradient(top, #53e9bc, #242424);
+    background-image: -moz-linear-gradient(top, #53e9bc, #242424);
+	background-image: -ms-linear-gradient(top, #53e9bc, #242424);
+	background-image: -o-linear-gradient(top, #53e9bc, #242424);
+}
+
+#oCo5R .exalted span {
+	background-color: #33ff33;
+	background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #2ee6e6),color-stop(1, #cc0000));
+	background-image: -webkit-linear-gradient(top, #2ee6e6, #242424);
+    background-image: -moz-linear-gradient(top, #2ee6e6, #242424);
+	background-image: -ms-linear-gradient(top, #2ee6e6, #242424);
+	background-image: -o-linear-gradient(top, #2ee6e6, #242424);
+}
+
+#oCo5R div a {
+	color: #fffff;
+}

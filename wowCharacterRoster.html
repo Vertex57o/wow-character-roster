@@ -4,7 +4,7 @@
 		<script type="text/javascript" src="http://static.wowhead.com/widgets/power.js"></script>
 		<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
 		<!-- assign the local style -->
-		<link rel="stylesheet" type="text/css" href="myCharRoster.css" />
+		<link rel="stylesheet" type="text/css" href="wowCharacterRoster.css" />
 	</head>
 	<body>
 		<!-- the body has one div, and the script populates it -->
@@ -102,42 +102,44 @@
 
 			// DEFINE VARIABLES
 			var $html;
-			var apiClasses;
-			var apiRaces;
+			var bnHost="http://us.battle.net";
+			var bnLocale="en_US";
 
 			// translate Blizzard's numeric values to text
 			var genders = new Array ("Male","Female");
 
-			// JSON DATA
-
+			// DATA RESOURCE VARIABLES
 			// http://us.battle.net/api/wow/data/character/classes
 			var apiClasses = {"classes":[
-				{"id":3,"mask":4,"powerType":"focus","name":"Hunter"},
-				{"id":4,"mask":8,"powerType":"energy","name":"Rogue"},
-				{"id":1,"mask":1,"powerType":"rage","name":"Warrior"},
-				{"id":2,"mask":2,"powerType":"mana","name":"Paladin"},
-				{"id":7,"mask":64,"powerType":"mana","name":"Shaman"},
-				{"id":8,"mask":128,"powerType":"mana","name":"Mage"},
-				{"id":5,"mask":16,"powerType":"mana","name":"Priest"},
-				{"id":6,"mask":32,"powerType":"runic-power","name":"Death Knight"},
-				{"id":11,"mask":1024,"powerType":"mana","name":"Druid"},
-				{"id":9,"mask":256,"powerType":"mana","name":"Warlock"}
+				{"id":1,"name":"Warrior"},
+				{"id":2,"name":"Paladin"},
+				{"id":3,"name":"Hunter"},
+				{"id":4,"name":"Rogue"},
+				{"id":5,"name":"Priest"},
+				{"id":6,"name":"Death Knight"},
+				{"id":7,"name":"Shaman"},
+				{"id":8,"name":"Mage"},
+				{"id":9,"name":"Warlock"},
+				{"id":11,"name":"Druid"},
 			]};
 
 			// http://us.battle.net/api/wow/data/character/races
 			var apiRaces = {"races":[
-				{"id":1,"mask":1,"side":"alliance","name":"Human"},
-				{"id":5,"mask":16,"side":"horde","name":"Undead"},
-				{"id":11,"mask":1024,"side":"alliance","name":"Draenei"},
-				{"id":7,"mask":64,"side":"alliance","name":"Gnome"},
-				{"id":8,"mask":128,"side":"horde","name":"Troll"},
-				{"id":4,"mask":8,"side":"alliance","name":"Night Elf"},
-				{"id":2,"mask":2,"side":"horde","name":"Orc"},
-				{"id":3,"mask":4,"side":"alliance","name":"Dwarf"},
-				{"id":10,"mask":512,"side":"horde","name":"Blood Elf"},
-				{"id":22,"mask":2097152,"side":"alliance","name":"Worgen"},
-				{"id":6,"mask":32,"side":"horde","name":"Tauren"},
-				{"id":9,"mask":256,"side":"horde","name":"Goblin"}
+				{"id":1,"side":"alliance","name":"Human"},
+				{"id":2,"side":"horde","name":"Orc"},
+				{"id":3,"side":"alliance","name":"Dwarf"},
+				{"id":4,"side":"alliance","name":"Night Elf"},
+				{"id":5,"side":"horde","name":"Forsaken"},
+				{"id":6,"side":"horde","name":"Tauren"},
+				{"id":7,"side":"alliance","name":"Gnome"},
+				{"id":8,"side":"horde","name":"Troll"},
+				{"id":9,"side":"horde","name":"Goblin"},
+				{"id":10,"side":"horde","name":"Blood Elf"},
+				{"id":11,"side":"alliance","name":"Draenei"},
+				{"id":22,"side":"alliance","name":"Worgen"},
+				{"id":24,"side":"neutral","name":"Pandaren"},
+				{"id":25,"side":"alliance","name":"Pandaren"},
+				{"id":26,"side":"horde","name":"Pandaren"}
 			]};
 
 			// item slots by number, name and empty icon
@@ -159,7 +161,6 @@
 				{"id": "15", "name": "back",     "icon": "http://4.bp.blogspot.com/-mjeWIgS6BnY/UCz4kbGYLAI/AAAAAAAAATg/QS2O8f-zkwA/s400/empty-chest.png"},
 				{"id": "16", "name": "mainHand", "icon": "http://2.bp.blogspot.com/-Bz6Jo7V7EK8/UCz4SiXRb_I/AAAAAAAAAR0/qcZeuIfkmmg/s400/empty-mainHand.png"},
 				{"id": "17", "name": "offHand",  "icon": "http://1.bp.blogspot.com/-kK9nFQa7iFU/UCz3_kiclxI/AAAAAAAAARQ/rGpF96uEEAY/s400/empty-offHand.png"},
-// 				{"id": "18", "name": "ranged",   "icon": "http://4.bp.blogspot.com/-OTo4uRJm6Qo/UCz3_TH08AI/AAAAAAAAARE/ISb4uDPeGe0/s400/empty-ranged.png"},
 				{"id": "19", "name": "tabard",   "icon": "http://4.bp.blogspot.com/-YWYJw6DtsJM/UCz4i8oeVPI/AAAAAAAAAS8/SdvbtaPSjxc/s400/empty-tabard.png"}
 			];
 
@@ -391,7 +392,8 @@
 				{ "id": "10", "name": "Moonhowls",    "realm": "Borean Tundra"},
 				{ "id": "11", "name": "Gibbergabber", "realm": "Velen"},
 				{ "id": "12", "name": "Cazadorito",   "realm": "Velen"},
-				{ "id": "13", "name": "Aeiou",        "realm": "Velen"}
+				{ "id": "13", "name": "Aeiou",        "realm": "Velen"},
+				{ "id": "14", "name": "Kalphop",      "realm": "Earthen Ring"}
 			];
 
 			// convert months to text
@@ -429,12 +431,12 @@
 				$html += "</div>";
 				$($html).appendTo("#oCo5R"); // write the character roster div
 
-				var url = "http://us.battle.net/api/wow/character/"+json.realm+"/"+json.name+
+				bnUrl = "http://us.battle.net/api/wow/character/"+json.realm+"/"+json.name+
 				"?fields=stats,feed,talents,items,reputation,titles,professions,companions,mounts,"+
 				"pet,achievements,progression,pvp,quests&jsonp=?";
 
 				// retrieve the JSON for this character from battle.net and store as 'bnJson'
-				$.getJSON( url, function( bnJson ) {
+				$.getJSON( bnUrl, function( bnJson ) {
 					// console.log("  Processing bnJSON data for "+bnJson.name);
 
 					// format the sub-section background

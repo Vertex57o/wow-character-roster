@@ -1,6 +1,6 @@
 #oCo5R {
-	font-family: Arial;
-	font-size: 12px;
+	font-family: 'Yanone Kaffeesatz', sans-serif;
+	font-size: 16px;
 	color: #4c4c4c;
 }
 
@@ -22,12 +22,12 @@
 
 /* ASSIGN A COLOR AND TEXT SIZE TO ELEMENTS */
 #oCo5R .rosterWrapper {
-	font-weight: bold;
-	text-transform: uppercase;
+/*	font-weight: bold;
+	text-transform: uppercase; */
+	font-size: 22px;
 }
 
 /* INVENTORY ITEM QUALITY LEVELS */
-
 #oCo5R .item-quality-0,
 #oCo5R .item-quality-1,
 #oCo5R .item-quality-2,
@@ -126,34 +126,24 @@
 #oCo5R .characterName,
 #oCo5R .charLevel,
 #oCo5R .rosterIcon,
-#oCo5R .achvPoints,
-#oCo5R .achvIcon {
+#oCo5R .achvPoints {
 	display: inline-block;
-}
-
-#oCo5R .achvPoints,
-#oCo5R .achvIcon {
-	float: right;
-}
-
-#oCo5R .charLevel {
-	margin: 0px 4px;
+	vertical-align: top;
 	height: 32px;
-	font-size: 32px;
 }
 
-#oCo5R .characterName {
-	width: 210px;
-	margin: 0px 6px;
-}
-
-#oCo5R .achvIcon {
-	height: 10px;
-	width: 8px;
-	margin: 0px 2px;
+#oCo5R .achvPoints {
+	float: right;
 	background-image: url("http://us.battle.net/wow/static/images/icons/achievements.gif");
-	background-position: top;
+	background-position: right;
 	background-repeat: no-repeat;
+	background-size: 8px 10px;
+	padding-right: 10px;
+}
+
+#oCo5R .characterName,
+#oCo5R .rosterIcon {
+	margin: 0px 4px;
 }
 
 /* LAYOUT THE SUBSECTION */
@@ -595,8 +585,4 @@ divide into two columns: left col @ x-pos 280px and right col @ x-pos 320px   */
     background-image: -moz-linear-gradient(top, #2ee6e6, #242424);
 	background-image: -ms-linear-gradient(top, #2ee6e6, #242424);
 	background-image: -o-linear-gradient(top, #2ee6e6, #242424);
-}
-
-#oCo5R div a {
-	color: #fffff;
 }

@@ -104,8 +104,6 @@
 
 	// DEFINE VARIABLES
 	var $html;
-	var bnHost="http://us.battle.net";
-	var bnLocale="en_US";
 
 	// translate Blizzard's numeric values to text
 	var genders = new Array ("Male","Female");
@@ -451,23 +449,46 @@
 		$html += "</div>";
 		$($html).appendTo("#"+cBody);
 
-		bnUrl = "http://us.battle.net/api/wow/character/"+json.realm+"/"+json.name+
-		"?fields=stats,feed,talents,items,reputation,titles,professions,companions,mounts,"+
-		"pet,achievements,progression,pvp,quests&jsonp=?";
+/*
+http://us.battle.net/api/wow/character/borean-tundra/cibolero?fields=achievements,
+appearance,feed,guild,hunterPets,items,mounts,pets,petSlots,professions,progression,
+pvp,quests,reputation,stats,talents,titles&locale=es_MX&jsonp=?
+*/
+		var bnRegion = "us";
+		var bnHost="http://"+bnRegion+".battle.net";
+		var bnLocale="en_US";
+		var bnFields="achievements,";
+		bnFields=bnFields+"appearance,";
+		bnFields=bnFields+"feed,";
+		bnFields=bnFields+"guild,";
+		bnFields=bnFields+"hunterPets,";
+		bnFields=bnFields+"items,";
+		bnFields=bnFields+"mounts,";
+		bnFields=bnFields+"pets,";
+		bnFields=bnFields+"petSlots,";
+		bnFields=bnFields+"professions,";
+		bnFields=bnFields+"progression,";
+		bnFields=bnFields+"pvp,";
+		bnFields=bnFields+"quests,";
+		bnFields=bnFields+"reputation,";
+		bnFields=bnFields+"stats,";
+		bnFields=bnFields+"talents,";
+		bnFields=bnFields+"titles";
+/* TO DO: Localization for other regions */
+
+		var bnUrl = bnHost+"/api/wow/character/"+json.realm+"/"+json.name+
+		"?fields="+bnFields+"&locale="+bnLocale+"&jsonp=?";
 
 		// retrieve the JSON for this character from battle.net and store as 'bnJson'
 		$.getJSON( bnUrl, function( bnJson ) {
 			// console.log("  Processing bnJSON data for "+bnJson.name);
 
 			// format the sub-section background
-			// http://us.battle.net/static-render/us/borean-tundra/57/42897977-profilemain.jpg?alt=/wow/static/images/2d/profilemain/race/22-0.jpg
+			// http://us.battle.net/static-render/us/borean-tundra/217/91693017-avatar.jpg?alt=wow/static/images/2d/avatar/25-0.jpg
+			// http://us.battle.net/static-render/us/borean-tundra/217/91693017-profilemain.jpg?alt=wow/static/images/2d/profilemain/race/25-0.jpg
+			var charAvatar=bnHost+"/static-render/"+bnRegion+"/"+bnJson.thumbnail+"?alt=wow/static/images/2d/avatar/"+bnJson.race+"-"+bnJson.gender+".jpg";
+			var charPortrait=bnHost+"/static-render/"+bnRegion+"/"+bnJson.thumbnail.replace(/-avatar\.jpg/,"-profilemain.jpg")+"?alt=wow/static/images/2d/profilemain/race/"+bnJson.race+"-"+bnJson.gender+".jpg";
 
-			if(typeof bnJson.thumbnail === "undefined") {
-				$html = charPortrait = "http://us.battle.net/wow/static/images/2d/profilemain/race/"+bnJson.race+"-"+bnJson.gender+".jpg";
-			}
-			else {
-				var charPortrait = "http://us.battle.net/static-render/us/"+bnJson.thumbnail.replace(/-avatar\.jpg/,"-profilemain.jpg");
-			};
 			updateBackgroundImage(cBody, charPortrait);
 
 			// write out the current roster entry wrapper
@@ -476,42 +497,44 @@
 			// Level
 			$html += "<div class=\"charLevel\">"+bnJson.level+"</div>";
 
-			// Faction and Race Icons
-			// use the current race from the api to look up the side in the predefined apiRaces
-			for (var i=0;i<apiRaces.races.length;i++) {
-				if (apiRaces.races[i].id == bnJson.race) { 	// get the race and gender for the icon
-					var rIcon = apiRaces.races[i].name; // for example -- race_gnome_male.jpg
-					rIcon = rIcon.replace(/ /g,'-');
-					rIcon = "race_"+rIcon+"_"+genders[bnJson.gender];
-					rIcon = rIcon.toLowerCase();
-					// use the race to determine the side
-					side = apiRaces.races[i].side.toLowerCase();
-					if (side=="horde") {
-						side="01";
-					}
-					else {
-						side="02";
-					};
-					// now get the side for the icon
-					var fIcon = "inv_bannerpvp_"+side
-					fIcon = blizzIcon(fIcon,"56");
-					break; // stop once found
-				};
-			};
-			$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+fIcon+")\"></div>";
-			$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+blizzIcon(rIcon, "56")+")\"></div>";
-
-			// Class Icon
-			// src="http://us.media.blizzard.com/wow/icons/56/class_hunter.jpg"
-			for ( var i=0;i<apiClasses.classes.length;i++ ) {
-				if (apiClasses.classes[i].id == bnJson.class) {
-					var cIcon = apiClasses.classes[i].name;
-					cIcon = cIcon.replace(/ /g,'-');
-					cIcon = "class_"+cIcon.toLowerCase();
-					break;
-				};
-			};
-			$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+blizzIcon(cIcon, "56")+")\"></div>";
+// Faction and Race Icons
+// use the current race from the api to look up the side in the predefined apiRaces
+// 			for (var i=0;i<apiRaces.races.length;i++) {
+// 				if (apiRaces.races[i].id == bnJson.race) { 	// get the race and gender for the icon
+// 					var rIcon = apiRaces.races[i].name; // for example -- race_gnome_male.jpg
+// 					rIcon = rIcon.replace(/ /g,'-');
+// 					rIcon = "race_"+rIcon+"_"+genders[bnJson.gender];
+// 					rIcon = rIcon.toLowerCase();
+// 					// use the race to determine the side
+// 					side = apiRaces.races[i].side.toLowerCase();
+// 					if (side=="horde") {
+// 						side="01";
+// 					}
+// 					else {
+// 						side="02";
+// 					};
+// 					// now get the side for the icon
+// 					var fIcon = "inv_bannerpvp_"+side
+// 					fIcon = blizzIcon(fIcon,"56");
+// 					break; // stop once found
+// 				};
+// 			};
+// 			$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+fIcon+")\"></div>";
+//
+// Class Icon
+// src="http://us.media.blizzard.com/wow/icons/56/class_hunter.jpg"
+// 			for ( var i=0;i<apiClasses.classes.length;i++ ) {
+// 				if (apiClasses.classes[i].id == bnJson.class) {
+// 					var cIcon = apiClasses.classes[i].name;
+// 					cIcon = cIcon.replace(/ /g,'-');
+// 					cIcon = "class_"+cIcon.toLowerCase();
+// 					break;
+// 				};
+// 			};
+// 			$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+blizzIcon(cIcon, "56")+")\"></div>";
+//
+			// Character Avatar
+ 			$html += "<div class=\"icon32 rosterIcon\" style=\"background-image: url("+charAvatar+")\"></div>";
 
 			// Character Name & Title
 			var selTitle = ""; // init empty title
@@ -535,7 +558,6 @@
 
 			// Total Achievement Points
 			$html += "<div class=\"achvPoints\">"+addCommas(bnJson.achievementPoints)+"</div>";
-			$html += "<div class=\"achvIcon\"></div>";
 			$html += "</a><div class=\"clear\"></div></div>";
 			$($html).appendTo("#"+cHead);
 
